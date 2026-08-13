@@ -1,9 +1,15 @@
 name: Basic Pipeline
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
   
 
 jobs:
@@ -23,7 +29,7 @@ jobs:
 
       - name: Check AWS CLI
         run: aws --version
-        
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4  
 
@@ -34,8 +40,10 @@ jobs:
       - name: Run terraform validate
         run: terraform validate
       - name: Run terraform apply
-        run: terraform apply 
+        if: ${{ inputs.action == 'apply' }}
+        run: terraform apply -auto-approve
 
       - name: Run terraform destroy
-        run: terraform destroy 
+        if: ${{ inputs.action == 'destroy' }}
+        run: terraform destroy -auto-approve
         
