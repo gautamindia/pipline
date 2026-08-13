@@ -1,15 +1,11 @@
 name: Basic Pipeline
 
 on:
+  push:
+    branches:
+      - main
+
   workflow_dispatch:
-    inputs:
-      action:
-        description: "Terraform action"
-        required: true
-        type: choice
-        options:
-          - apply
-          - destroy
   
 
 jobs:
@@ -29,7 +25,7 @@ jobs:
 
       - name: Check AWS CLI
         run: aws --version
-
+        
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4  
 
@@ -39,11 +35,35 @@ jobs:
         run: terraform plan
       - name: Run terraform validate
         run: terraform validate
+      
+
+  terraform-apply:
+    name: "Terraform Apply Check"
+    runs-on: ubuntu-latest
+    needs: build
+    # 3. This environment trigger enforces the manual 'Approve/Deny' button gate
+    environment: production 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Check AWS CLI
+        run: aws --version
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4  
+
+      - name: Run terraform init
+        run: terraform init
       - name: Run terraform apply
-        if: ${{ inputs.action == 'apply' }}
         run: terraform apply -auto-approve
 
-      - name: Run terraform destroy
-        if: ${{ inputs.action == 'destroy' }}
-        run: terraform destroy -auto-approve
         
