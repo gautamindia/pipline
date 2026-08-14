@@ -3,8 +3,8 @@ resource "aws_lb" "this" {
   internal           = false
   load_balancer_type = "application"
  
-  security_groups = var.security_group_ids
-  subnets         = var.subnet_ids
+  security_groups = var.alb_security_group_ids
+  subnets         = var.alb_subnet_ids
 
   enable_cross_zone_load_balancing = true
 

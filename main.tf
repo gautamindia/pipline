@@ -5,27 +5,27 @@ provider "aws" {
 module "ec2" {
     source = "./modules/ec2"
     
-    instance_type  = "t3.micro"
-    subnet_id      = "subnet-0fec5c982cd896d38"  
+    name                = var.name
+  ami                 = var.ami
+  instance_count      = var.instance_count
+  instance_type       = var.instance_type
+  ec2_subnet_id       = var.ec2_subnet_id
+  security_group_ids  = var.security_group_ids
+  key_name            = var.key_name
 }
 
 module "alb" {
   source = "./modules/alb"
+alb_name = var.alb_name
+target_group_name = var.target_group_name
+vpc_id = var.vpc_id
 
-  alb_name          = "my-alb"
-  target_group_name = "my-target-group"
+alb_subnet_ids = var.alb_subnet_ids
+alb_security_group_ids = var.alb_security_group_ids
 
-  vpc_id = "vpc-0a1b452f5303ea84c"
+target_ids = module.ec2.instance_ids
 
-  subnet_ids = [
-    "subnet-0fec5c982cd896d38",
-    "subnet-0a8cb70c3a5e3a032",
-    "subnet-0c2077fb8aac3294a"
-  ]
 
-  security_group_ids = [
-    "sg-015a9768ce7165dc5"
-  ]
 
-  target_ids = module.ec2.instance_ids
+
 }
